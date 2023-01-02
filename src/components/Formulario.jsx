@@ -1,6 +1,7 @@
-import useSeleccionarMonedas from "../hooks/useSeleccionarMonedas"
 import styled from "@emotion/styled"
-
+import { useEffect } from "react"
+import { monedas } from "../data/seleccionOpciones"
+import useSelectMonedas from "../hooks/useSelectMonedas"
 const InputSubmit= styled.input`
     background-color:#9497ff;
     border:none;
@@ -18,19 +19,32 @@ const InputSubmit= styled.input`
     }
 `
 const Formulario = () => {
-
-    const [ seleccionarMonedas]=useSeleccionarMonedas()
+    const [moneda,SelectMoneda]=useSelectMonedas('Seleccione una moneda:',monedas)
+    useEffect(() => {
+      const consultarAPI=async()=>{
+        const urlAPI='https://min-api.cryptocompare.com/data/top/mktcapfull?limit=5&tsym=USD'
+        const request=await fetch(urlAPI)
+        const response=await request.json()
+        //a traves de la funcion map, creamos un array de objetos
+        //en el que cada objeto le asignaremos la información
+        //mas importante de la criptomoneda
+        const arrayCriptos=response.Data.map(cripto=>{
+            const objetoCripto={
+                id:cripto.CoinInfo.Name,
+                nombre:cripto.CoinInfo.FullName
+            }
+            return objetoCripto
+        })
+      }
+      consultarAPI()
+    }, [])
     
-    const handleSubmit=(e)=>{
-        e.preventDefault()
-        seleccionarMonedas()
-    }
   return (
     <form>
+        <SelectMoneda/>
         <InputSubmit
             type={'submit'}
             value={'cotizar'}
-            onClick={handleSubmit }
         />
     </form>
   )
